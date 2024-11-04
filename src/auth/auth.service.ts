@@ -7,7 +7,8 @@ import { ConfigService } from '@nestjs/config';
 import { TokensResponse } from '../model/tokens.model';
 import { v7 as uuidv7 } from 'uuid';
 import * as argon2 from 'argon2';
-import * as crypto from 'crypto';
+import * as bcrypt from 'bcrypt';
+
 import {
   CurrentUserResponse,
   EmailVerificationRequest,
@@ -16,7 +17,6 @@ import {
   ForgotPasswordResponse,
   LoginRequest,
   LoginResponse,
-  RefreshTokenRequest,
   RefreshTokenResponse,
   RegisterUserRequest,
   RegisterUserResponse,
@@ -31,7 +31,7 @@ import { Role, User } from './user.entity';
 @Injectable()
 export class AuthService {
   constructor(
-    @Inject(WINSTON_MODULE_PROVIDER) private logger: Logger,
+    @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
     private validationService: ValidationService,
     private em: EntityManager,
     private jwtService: JwtService,
@@ -88,12 +88,11 @@ export class AuthService {
     userId: number,
     refreshToken: string,
   ): Promise<void> {
-    const hashRefreshToken = await argon2.hash(refreshToken);
-    await this.em.nativeUpdate(
-      User,
-      { id: userId },
-      { refreshToken: hashRefreshToken },
-    );
+    const hashRefreshToken = await bcrypt.hash(refreshToken, 10);
+    // const hashRefreshToken = await argon2.hash(refreshToken);
+    const user = await this.em.findOne(User, { id: userId });
+    user.refreshToken = hashRefreshToken;
+    await this.em.flush();
   }
 
   async register(request: RegisterUserRequest): Promise<RegisterUserResponse> {
@@ -230,11 +229,15 @@ export class AuthService {
 
   async logout(user: User, response: Response): Promise<void> {
     this.logger.debug(`LOGOUT USER: ${JSON.stringify(user)}`);
-    user.refreshToken = '';
+
+    const userWithRefreshToken = await this.em.findOne(User, { id: user.id });
+    userWithRefreshToken.refreshToken = '';
     await this.em.flush();
 
     response.clearCookie('accesstoken');
     response.clearCookie('refreshtoken');
+
+    return null;
   }
 
   async refreshToken(
@@ -243,28 +246,54 @@ export class AuthService {
   ): Promise<RefreshTokenResponse> {
     this.logger.debug(`REFRESH TOKEN: ${refreshToken}`);
 
-    const request = this.validationService.validate(
+    // Step 1: Validate the format of the refresh token
+    const validatedToken = this.validationService.validate(
       AuthValidation.REFRESH_TOKEN,
       refreshToken,
     );
-    const user = await this.em.findOne(User, {
-      refreshToken: request.refreshToken,
-    });
 
-    if (!user) throw new HttpException('Invalid refresh token', 400);
+    if (!validatedToken) {
+      throw new HttpException('Invalid refresh token format', 400);
+    }
 
-    const isTokenValid = await argon2.verify(user.refreshToken, refreshToken);
-    if (!isTokenValid) throw new HttpException('Invalid refresh token', 400);
+    // Step 2: Decode token to get user ID or other identifier
+    const decodedToken = this.jwtService.decode(refreshToken) as {
+      sub: number;
+    };
+    const userId = decodedToken?.sub;
+    if (!userId) {
+      throw new HttpException('Invalid token payload', 400);
+    }
 
+    // Step 3: Find user by ID
+    const user = await this.em.findOne(User, { id: userId });
+    if (!user || !user.refreshToken) {
+      throw new HttpException('Invalid refresh token', 400);
+    }
+
+    // Step 4: Compare the provided refresh token with the hashed token in the database
+    const isRefreshTokenValid = await bcrypt.compare(
+      refreshToken,
+      user.refreshToken,
+    );
+    if (!isRefreshTokenValid) {
+      throw new HttpException('Invalid refresh token', 400);
+    }
+
+    // Step 5: Generate a new access token
     const newAccessToken = await this.createAccessToken(user.id);
 
+    // Set the new access token in a secure HTTP-only cookie
     response.cookie('accesstoken', newAccessToken, {
       httpOnly: true,
       secure: this.configService.get('NODE_ENV') === 'production',
       sameSite: 'none',
     });
 
-    return { accessToken: newAccessToken, refreshToken };
+    return {
+      accessToken: newAccessToken,
+      refreshToken: user.refreshToken,
+    };
   }
 
   async forgotPassword(

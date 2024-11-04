@@ -17,6 +17,10 @@ export class AuthValidation {
     password: z.string().min(6).max(100),
   });
 
+  // static readonly REFRESH_TOKEN: ZodType = z.object({
+  //   refreshToken: z.string().min(6).max(255),
+  // });
+
   static readonly REFRESH_TOKEN: ZodType = z.string().min(6).max(255);
 
   static readonly FORGOT_PASSWORD: ZodType = z.object({

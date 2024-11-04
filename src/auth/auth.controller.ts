@@ -32,7 +32,7 @@ import { User } from './user.entity';
 
 @Controller('/api/v1/auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(private authService: AuthService) {}
 
   @HttpCode(HttpStatus.CREATED)
   @Post('/register')
