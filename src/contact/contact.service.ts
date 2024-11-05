@@ -148,48 +148,39 @@ export class ContactService {
 
     if (searchReq.username) {
       filters.push({
-        OR: [
-          {
-            firstName: {
-              contains: searchReq.username,
-            },
-          },
-          {
-            lastName: {
-              contains: searchReq.username,
-            },
-          },
+        // Note: Use MikroORM's syntax for logical operations
+        $or: [
+          { firstName: { $like: `%${searchReq.username}%` } },
+          { lastName: { $like: `%${searchReq.username}%` } },
         ],
       });
     }
 
     if (searchReq.email) {
-      filters.push({
-        email: {
-          contains: searchReq.email,
-        },
-      });
+      filters.push({ email: { $like: `%${searchReq.email}%` } });
     }
 
     if (searchReq.phone) {
-      filters.push({
-        phone: {
-          contains: searchReq.phone,
-        },
-      });
+      filters.push({ phone: { $like: `%${searchReq.phone}%` } });
     }
+
+    // If no filters are applied, return an error or fetch all contacts based on requirements
+    // if (filters.length === 0) {
+    //   throw new HttpException(`Please provide data`, 400);
+    // }
 
     const skip = (searchReq.page - 1) * searchReq.size;
 
+    // Use MikroORM's query builder to find contacts with the constructed filters
     const contacts = await this.em.find(
       Contact,
       {
         user: user,
-        $and: filters,
+        $and: filters, // Combine filters using AND
       },
       {
-        limit: searchReq.size, // `take` in Prisma corresponds to `limit` in MikroORM
-        offset: skip, // `skip` in Prisma corresponds to `offset` in MikroORM
+        limit: searchReq.size,
+        offset: skip,
       },
     );
 

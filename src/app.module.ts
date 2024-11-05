@@ -5,6 +5,7 @@ import { ContactModule } from './contact/contact.module';
 import { AddressModule } from './address/address.module';
 import { ConfigModule } from '@nestjs/config';
 import { CommonModule } from './common/common.module';
+import { MikroService } from './mikro/mikro.service';
 
 @Module({
   imports: [
@@ -18,6 +19,6 @@ import { CommonModule } from './common/common.module';
     AddressModule,
   ],
   controllers: [],
-  providers: [],
+  providers: [MikroService],
 })
 export class AppModule {}

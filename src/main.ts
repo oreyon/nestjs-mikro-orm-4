@@ -20,6 +20,9 @@ async function bootstrap() {
       'Content-Type, Accept, Authorization, accesstoken, refreshtoken', // allow custom header
     credentials: true, // enable set cookie
   });
+
+  // enable shutdown hooks for SIGTERM so mikroOrm connection will closed if process is terminated
+  app.enableShutdownHooks();
   await app.listen(3000);
 }
 bootstrap();
