@@ -9,6 +9,9 @@ npm install --save @mikro-orm/entity-generator @mikro-orm/migrations @mikro-orm/
 npm install --save-dev @mikro-orm/cli
 npm install --save-dev pluralize @types/pluralize
 
+<!-- open api swagger documentation -->
+npm install --save @nestjs/swagger
+<!-- open api swagger documentation -->
 ---
 
 - install mikro cli for convinient terminal.

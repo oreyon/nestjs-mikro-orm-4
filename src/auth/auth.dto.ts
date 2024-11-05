@@ -1,10 +1,34 @@
 // import { Role } from '@prisma/client';
 
+import { ApiProperty } from '@nestjs/swagger';
 import { Role } from './user.entity';
 
 export class RegisterUserRequest {
+  @ApiProperty({
+    description: 'Email address of the user',
+    format: 'email',
+    minimum: 6,
+    maximum: 100,
+    example: 'example@example.com',
+  })
   email: string;
+
+  @ApiProperty({
+    description: 'Password of the user',
+    format: 'text',
+    minimum: 6,
+    maximum: 100,
+    example: 'exapamplepassword',
+  })
   password: string;
+
+  @ApiProperty({
+    description: 'Username of the user',
+    format: 'text',
+    minimum: 6,
+    maximum: 100,
+    example: 'examplename',
+  })
   username: string;
   // role: Role;
   // emailVerificationToken: string;
@@ -17,7 +41,22 @@ export class RegisterUserResponse {
 }
 
 export class EmailVerificationRequest {
+  @ApiProperty({
+    description: 'Email address of the user',
+    format: 'email',
+    minimum: 6,
+    maximum: 100,
+    example: 'example@example.com',
+  })
   email: string;
+
+  @ApiProperty({
+    description: 'Token verification email',
+    format: 'text',
+    minimum: 6,
+    maximum: 100,
+    example: 'secret',
+  })
   emailVerificationToken: string;
 }
 
@@ -29,7 +68,22 @@ export class EmailVerificationResponse {
 }
 
 export class LoginRequest {
+  @ApiProperty({
+    description: 'Email address of the user',
+    format: 'email',
+    minimum: 6,
+    maximum: 100,
+    example: 'example@example.com',
+  })
   email: string;
+
+  @ApiProperty({
+    description: 'Password of the user',
+    format: 'text',
+    minimum: 6,
+    maximum: 100,
+    example: 'exapamplepassword',
+  })
   password: string;
 }
 
@@ -47,6 +101,13 @@ export class CurrentUserResponse {
 }
 
 export class RefreshTokenRequest {
+  @ApiProperty({
+    description: 'Refresh token of the user',
+    format: 'text',
+    minimum: 6,
+    maximum: 255,
+    example: 'JSONWebToken',
+  })
   refreshToken: string;
 }
 
@@ -56,6 +117,13 @@ export class RefreshTokenResponse {
 }
 
 export class ForgotPasswordRequest {
+  @ApiProperty({
+    description: 'Email address of the user',
+    format: 'email',
+    minimum: 6,
+    maximum: 100,
+    example: 'example@example.com',
+  })
   email: string;
 }
 
@@ -65,9 +133,47 @@ export class ForgotPasswordResponse {
 }
 
 export class ResetPasswordRequest {
+  @ApiProperty({
+    description: 'Email address of the user',
+    format: 'email',
+    minimum: 6,
+    maximum: 100,
+    example: 'example@example.com',
+  })
   email: string;
+
+  @ApiProperty({
+    description: 'New password of the user',
+    format: 'text',
+    minimum: 6,
+    maximum: 100,
+    example: 'updatedexamplepassword',
+  })
   newPassword: string;
+
+  @ApiProperty({
+    description: 'New password of the user',
+    format: 'text',
+    minimum: 6,
+    maximum: 100,
+    example: 'updatedexamplepassword',
+  })
   repeatNewPassword: string;
+
+  @ApiProperty({
+    description: 'New password of the user',
+    format: 'text',
+    minimum: 6,
+    maximum: 100,
+    example: 'updatedexamplepassword',
+  })
+  @ApiProperty({
+    description: 'Reset password token',
+    format: 'text',
+    minimum: 6,
+    maximum: 100,
+    example: 'secret',
+  })
   resetPasswordToken: string;
 }
 
