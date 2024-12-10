@@ -39,7 +39,7 @@ export class User {
   @Property({ default: false })
   isVerified: boolean = false;
 
-  @Property({ nullable: true })
+  @Property({ nullable: true, columnType: 'timestamp' })
   verifiedTime?: Date;
 
   @Property({ length: 255, nullable: true })
@@ -48,14 +48,18 @@ export class User {
   @Property({ length: 255, nullable: true })
   passwordResetToken?: string;
 
-  @Property({ nullable: true })
+  @Property({ nullable: true, columnType: 'timestamp' })
   passwordResetTokenExpirationTime?: Date;
 
-  @Property({ onCreate: () => new Date() })
-  createdAt: Date = new Date();
+  @Property({ onCreate: () => new Date(), columnType: 'timestamp' })
+  createdAt: Date;
 
-  @Property({ onUpdate: () => new Date() })
-  updatedAt: Date = new Date();
+  @Property({
+    onCreate: () => new Date(),
+    onUpdate: () => new Date(),
+    columnType: 'timestamp',
+  })
+  updatedAt: Date;
 
   @OneToMany(() => Contact, (contact) => contact.user)
   contacts = new Collection<Contact>(this);

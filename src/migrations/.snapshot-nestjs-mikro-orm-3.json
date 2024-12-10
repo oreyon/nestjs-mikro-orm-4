@@ -79,7 +79,7 @@
         },
         "verified_time": {
           "name": "verified_time",
-          "type": "datetime",
+          "type": "timestamp",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
@@ -109,7 +109,7 @@
         },
         "password_reset_token_expiration_time": {
           "name": "password_reset_token_expiration_time",
-          "type": "datetime",
+          "type": "timestamp",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
@@ -119,7 +119,7 @@
         },
         "created_at": {
           "name": "created_at",
-          "type": "datetime",
+          "type": "timestamp",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
@@ -129,7 +129,7 @@
         },
         "updated_at": {
           "name": "updated_at",
-          "type": "datetime",
+          "type": "timestamp",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,

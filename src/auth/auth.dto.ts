@@ -161,13 +161,6 @@ export class ResetPasswordRequest {
   repeatNewPassword: string;
 
   @ApiProperty({
-    description: 'New password of the user',
-    format: 'text',
-    minimum: 6,
-    maximum: 100,
-    example: 'updatedexamplepassword',
-  })
-  @ApiProperty({
     description: 'Reset password token',
     format: 'text',
     minimum: 6,

@@ -145,25 +145,46 @@ export class AuthService {
   ): Promise<EmailVerificationResponse> {
     this.logger.debug(`VERIFY EMAIL: ${JSON.stringify(request)}`);
 
-    const verifyEmailRequest = this.validationService.validate(
-      AuthValidation.EMAIL_VERIFICATION,
-      request,
-    );
+    const verifyEmailRequest: EmailVerificationRequest =
+      this.validationService.validate(
+        AuthValidation.EMAIL_VERIFICATION,
+        request,
+      );
 
     const user = await this.em.findOne(User, {
       email: verifyEmailRequest.email,
-      emailVerificationToken: verifyEmailRequest.emailVerificationToken,
     });
 
     if (!user) {
       throw new HttpException('Invalid email address', 400);
     }
 
+    if (
+      verifyEmailRequest.emailVerificationToken !== user.emailVerificationToken
+    ) {
+      throw new HttpException('Invalid token', 400);
+    }
+
+    console.log(user.emailVerificationToken);
+    const date = Date.now();
+    console.log(date);
+    console.log(
+      new Date(date).toLocaleString('id-ID', { timeZone: 'Asia/Kuala_Lumpur' }),
+    );
+
     user.isVerified = true;
     user.verifiedTime = new Date();
     user.emailVerificationToken = '';
 
     await this.em.flush();
+
+    const exampleDate = 1733848146859;
+    console.log(
+      `Example date from unix to local time`,
+      new Date(exampleDate).toLocaleString('id-ID', {
+        timeZone: 'Asia/Kuala_Lumpur',
+      }),
+    );
 
     return {
       email: user.email,

@@ -1,8 +1,9 @@
 <!-- core -->
-npm i -s @mikro-orm/core @mikro-orm/nestjs @mikro-orm/mysql       # for mysql/mariadb
+npm i -s @mikro-orm/core @mikro-orm/nestjs @mikro-orm/mysql # for mysql/mariadb
 
 <!-- extension -->
-npm install --save @mikro-orm/entity-generator @mikro-orm/migrations @mikro-orm/reflection @mikro-orm/seeder @mikro-orm/sql-highlighter
+npm install --save @mikro-orm/entity-generator @mikro-orm/migrations @mikro-orm/reflection @mikro-orm/seeder
+@mikro-orm/sql-highlighter
 
 <!-- for development -->
 <!-- cli is the most important after core dependency -->
@@ -19,6 +20,10 @@ npm install --save @nestjs/swagger
 - create mikro-orm module to import methods
 - create mikro-orm.config.ts as configuration settings of mikro orm
 - just use migration instead of schema beacuse the habbit more safer
+- create migration file
+  npx mikro-orm migration:create
+- migrate entity to database
+  npx mikro-orm migration:up || npx mikro-orm migration:fresh
 
 logs
 
@@ -29,19 +34,31 @@ logs
 --
 
 - Create database schema,This will also create the database if it does not exist.
-npx mikro-orm schema:create -r
+  npx mikro-orm schema:create -r
 
-npx mikro-orm schema:create --dump   # Dumps create schema SQL
-npx mikro-orm schema:update --dump   # Dumps update schema SQL
-npx mikro-orm schema:drop --dump     # Dumps drop schema SQL
+npx mikro-orm schema:create --dump # Dumps create schema SQL
+npx mikro-orm schema:update --dump # Dumps update schema SQL
+npx mikro-orm schema:drop --dump # Dumps drop schema SQL
 
 NOTE:
-    SchemaGenerator can do harm to your database. It will drop or alter tables, indexes, sequences and such. Please use this tool with caution in development and not on a production server. It is meant for helping you develop your Database Schema, but NOT with migrating schema from A to B in production. A safe approach would be generating the SQL on development server and saving it into SQL Migration files that are executed manually on the production server.
+SchemaGenerator can do harm to your database. It will drop or alter tables, indexes, sequences and such. Please use this
+tool with caution in development and not on a production server. It is meant for helping you develop your Database
+Schema, but NOT with migrating schema from A to B in production. A safe approach would be generating the SQL on
+development server and saving it into SQL Migration files that are executed manually on the production server.
 
     SchemaGenerator assumes your project uses the given database on its own. Update and Drop commands will mess with other tables if they are not related to the current project that is using MikroORM. Please be careful!
 
 - naming strategy to plural
-npm install --save-dev pluralize @types/pluralize
+  npm install --save-dev pluralize @types/pluralize
+
+- Trivia about saving data in datetime, timestamp, unix time(big int)
+  timestamp(4 bytes): 2021-08-01 00:00:00
+  datetime(5-8 bytes): 2021-08-01 00:00:00
+  unix time(8 bytes | big int): 1627776000
+
+timetamp and datetime is the more easy to query
+unix time need more advanced to do query in database (from number to date and query)
+example: select * from table where date = from_unixtime(1627776000)
 
 ---
 COMMAND CLI

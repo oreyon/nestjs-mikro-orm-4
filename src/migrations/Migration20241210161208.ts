@@ -1,9 +1,9 @@
 import { Migration } from '@mikro-orm/migrations';
 
-export class Migration20241103170023 extends Migration {
+export class Migration20241210161208 extends Migration {
 
   override async up(): Promise<void> {
-    this.addSql(`create table \`users\` (\`id\` int unsigned not null auto_increment primary key, \`email\` varchar(100) not null, \`username\` varchar(100) not null, \`password\` varchar(100) not null, \`role\` enum('USER', 'ADMIN') not null default 'USER', \`refresh_token\` varchar(255) null, \`is_verified\` tinyint(1) not null default false, \`verified_time\` datetime null, \`email_verification_token\` varchar(255) null, \`password_reset_token\` varchar(255) null, \`password_reset_token_expiration_time\` datetime null, \`created_at\` datetime not null, \`updated_at\` datetime not null) default character set utf8mb4 engine = InnoDB;`);
+    this.addSql(`create table \`users\` (\`id\` int unsigned not null auto_increment primary key, \`email\` varchar(100) not null, \`username\` varchar(100) not null, \`password\` varchar(100) not null, \`role\` enum('USER', 'ADMIN') not null, \`refresh_token\` varchar(255) null, \`is_verified\` tinyint(1) not null default false, \`verified_time\` timestamp null, \`email_verification_token\` varchar(255) null, \`password_reset_token\` varchar(255) null, \`password_reset_token_expiration_time\` timestamp null, \`created_at\` timestamp not null, \`updated_at\` timestamp not null) default character set utf8mb4 engine = InnoDB;`);
     this.addSql(`alter table \`users\` add unique \`users_email_unique\`(\`email\`);`);
     this.addSql(`alter table \`users\` add unique \`users_username_unique\`(\`username\`);`);
 
