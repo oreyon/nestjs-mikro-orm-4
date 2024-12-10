@@ -12,6 +12,7 @@ npm install --save-dev pluralize @types/pluralize
 <!-- open api swagger documentation -->
 npm install --save @nestjs/swagger
 <!-- open api swagger documentation -->
+
 ---
 
 - install mikro cli for convinient terminal.

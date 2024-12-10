@@ -29,7 +29,7 @@ import { Response } from 'express';
 import { AccessTokenGuard, RefreshTokenGuard } from '../common/guards';
 import { UserData } from '../common/decorators';
 import { User } from './user.entity';
-import { ApiSecurity } from '@nestjs/swagger';
+import { ApiBearerAuth } from '@nestjs/swagger';
 
 @Controller('/api/v1/auth')
 export class AuthController {
@@ -75,8 +75,7 @@ export class AuthController {
     };
   }
 
-  @ApiSecurity('accesstoken')
-  @ApiSecurity('refrehstoken')
+  @ApiBearerAuth()
   @UseGuards(AccessTokenGuard)
   @HttpCode(HttpStatus.OK)
   @Get('/current')
@@ -91,6 +90,7 @@ export class AuthController {
     };
   }
 
+  @ApiBearerAuth()
   @UseGuards(AccessTokenGuard)
   @HttpCode(HttpStatus.OK)
   @Delete('/logout')
@@ -106,6 +106,7 @@ export class AuthController {
     };
   }
 
+  @ApiBearerAuth()
   @UseGuards(RefreshTokenGuard)
   @HttpCode(HttpStatus.OK)
   @Post('/refresh-token')

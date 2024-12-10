@@ -1,11 +1,10 @@
 import { HttpException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
-import { Strategy } from 'passport-jwt';
-// import { PrismaService } from '../../prisma/prisma.service';
-import { Request } from 'express';
+import { ExtractJwt, Strategy } from 'passport-jwt';
 import { EntityManager, MikroORM } from '@mikro-orm/mysql';
 import { User } from '../../auth/user.entity';
+import { Request } from 'express';
 
 export class JwtPayload {
   jti: string;
@@ -25,6 +24,8 @@ export class AccessTokenStrategy extends PassportStrategy(
     readonly orm: MikroORM,
   ) {
     super({
+      // take token from custom header
+      /*
       jwtFromRequest: (req: Request) => {
         // check if the token is in the headers
         // const tokenFromHeaders = req.headers['accesstoken'];
@@ -40,9 +41,23 @@ export class AccessTokenStrategy extends PassportStrategy(
 
         return null;
       },
+      */
+
+      jwtFromRequest: ExtractJwt.fromExtractors([
+        AccessTokenStrategy.extractJWT,
+        ExtractJwt.fromAuthHeaderAsBearerToken(),
+      ]),
       ignoreExpiration: false,
       secretOrKey: configService.get('JWT_ACCESS_TOKEN_SECRET'),
     });
+  }
+
+  private static extractJWT(req: Request): string | null {
+    const tokenFromCookies = req.signedCookies['accesstoken'];
+    if (tokenFromCookies) {
+      return tokenFromCookies;
+    }
+    return null;
   }
 
   async validate(payload: JwtPayload) {
@@ -50,12 +65,6 @@ export class AccessTokenStrategy extends PassportStrategy(
     if (!jti) {
       throw new HttpException('Invalid access token', 401);
     }
-
-    // const user = await this.prismaService.user.findFirst({
-    //   where: {
-    //     id: payload.sub,
-    //   },
-    // });
 
     const user = await this.em.findOne(User, { id: payload.sub });
 

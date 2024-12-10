@@ -7,11 +7,13 @@ import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import * as cookieParser from 'cookie-parser';
 import { TestService } from './test.service';
 import { TestModule } from './test.module';
+import { ConfigService } from '@nestjs/config';
 
 describe('AuthController', () => {
   let app: INestApplication;
   let logger: Logger;
   let testService: TestService;
+  const configService = new ConfigService();
 
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -23,7 +25,12 @@ describe('AuthController', () => {
     logger = app.get(WINSTON_MODULE_PROVIDER);
     testService = app.get(TestService);
 
-    app.use(cookieParser());
+    app.use(
+      cookieParser([
+        `${configService.get('JWT_ACCESS_TOKEN_SECRET')}`,
+        `${configService.get('JWT_REFRESH_TOKEN_SECRET')}`,
+      ]),
+    );
     app.enableShutdownHooks();
     await app.init();
   });
@@ -244,10 +251,16 @@ describe('AuthController', () => {
 
     it('should be able to get current user', async () => {
       const tokens = await testService.login(app);
+      console.log(tokens.signedAccessToken);
+      console.log(tokens.signedRefreshToken);
 
+      // Pass signed token to cookie
       const response = await request(app.getHttpServer())
         .get('/api/v1/auth/current')
-        .set('Cookie', [`accesstoken=${tokens.accessToken}`]);
+        // .set('Authorization', `Bearer ${tokens.accessToken}`);
+        .set('Cookie', [`${tokens.signedAccessToken}`]);
+
+      console.log('Response:', response);
 
       logger.info(response.body);
       expect(response.status).toBe(200);
@@ -283,7 +296,8 @@ describe('AuthController', () => {
 
       const response = await request(app.getHttpServer())
         .delete('/api/v1/auth/logout')
-        .set('Cookie', [`accesstoken=${tokens.accessToken}`]);
+        .set('Cookie', [`${tokens.signedAccessToken}`]);
+      // .set('Authorization', `Bearer ${tokens.accessToken}`);
 
       logger.info(response.body);
       expect(response.status).toBe(200);
@@ -319,7 +333,8 @@ describe('AuthController', () => {
 
       const response = await request(app.getHttpServer())
         .post('/api/v1/auth/refresh-token')
-        .set('Cookie', [`refreshtoken=${tokens.refreshToken}`]);
+        // .set('Cookie', [`refreshtoken=${tokens.refreshToken}`]);
+        .set('Authorization', `Bearer ${tokens.refreshToken}`);
 
       logger.info(response.body);
       expect(response.status).toBe(200);

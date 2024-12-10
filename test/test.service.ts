@@ -46,9 +46,15 @@ export class TestService {
         password: 'example',
       });
 
+    const cookies = response.header['set-cookie'];
+    expect(cookies).toBeDefined();
+    console.log(cookies);
+
     return {
       accessToken: response.body.data.accessToken,
       refreshToken: response.body.data.refreshToken,
+      signedAccessToken: cookies[0],
+      signedRefreshToken: cookies[1],
     };
   }
 

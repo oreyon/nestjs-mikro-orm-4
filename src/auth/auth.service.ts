@@ -202,11 +202,14 @@ export class AuthService {
       httpOnly: true,
       secure: this.configService.get('NODE_ENV') === 'production',
       sameSite: 'none',
+      signed: true,
     });
+
     response.cookie('refreshtoken', tokens.refreshToken, {
       httpOnly: true,
       secure: this.configService.get('NODE_ENV') === 'production',
       sameSite: 'none',
+      signed: true,
     });
 
     return {
@@ -288,6 +291,7 @@ export class AuthService {
       httpOnly: true,
       secure: this.configService.get('NODE_ENV') === 'production',
       sameSite: 'none',
+      signed: true,
     });
 
     return {

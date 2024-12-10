@@ -9,14 +9,19 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 async function bootstrap() {
   const configService = new ConfigService();
   const app = await NestFactory.create(AppModule);
-  app.setGlobalPrefix('api');
+  // app.setGlobalPrefix('api');
   console.log(process.env.TEST);
   const logger = app.get(WINSTON_MODULE_NEST_PROVIDER);
 
-  app.use(cookieParser());
+  app.use(
+    cookieParser([
+      `${configService.get('JWT_ACCESS_TOKEN_SECRET')}`,
+      `${configService.get('JWT_REFRESH_TOKEN_SECRET')}`,
+    ]),
+  );
   app.useLogger(logger);
   app.enableCors({
-    origin: [configService.get('IP_FRONTEND_ORIGIN'), 'http://localhost:3000'],
+    origin: [configService.get('IP_FRONTEND_ORIGIN')],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     allowedHeaders:
       'Content-Type, Accept, Authorization, accesstoken, refreshtoken', // allow custom header
@@ -32,16 +37,7 @@ async function bootstrap() {
     .setDescription('The Contact App API description')
     .setVersion('1.0')
     .addTag('contact')
-    .addSecurity('accesstoken', {
-      type: 'apiKey',
-      name: 'accesstoken',
-      in: 'cookie',
-    })
-    .addSecurity('refreshtoken', {
-      type: 'apiKey',
-      name: 'refreshtoken',
-      in: 'cookie',
-    })
+    .addBearerAuth()
     .build();
   const documentFactory = () => SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, documentFactory());
