@@ -3,9 +3,12 @@ import {
   Controller,
   Delete,
   Get,
+  Headers,
   HttpCode,
   HttpStatus,
+  Ip,
   Post,
+  Req,
   Res,
   UseGuards,
 } from '@nestjs/common';
@@ -25,7 +28,7 @@ import {
   ResetPasswordResponse,
 } from './auth.dto';
 import { WebResponse } from '../model/web.model';
-import { Response } from 'express';
+import { Request, Response } from 'express';
 import { AccessTokenGuard, RefreshTokenGuard } from '../common/guards';
 import { UserData } from '../common/decorators';
 import { User } from './user.entity';
@@ -146,6 +149,25 @@ export class AuthController {
       code: HttpStatus.OK,
       status: 'Password successfully reset',
       data: result,
+    };
+  }
+
+  @Get('/check-ip')
+  async checkIp(
+    @Ip() ip: string, // Get the IP address
+    @Headers('user-agent') userAgent: string, // Get the User-Agent header
+    @Req() request: Request, // Access the full request object if needed
+  ) {
+    console.log('IP Address:', ip);
+    console.log('User-Agent:', userAgent);
+
+    return {
+      code: HttpStatus.OK,
+      status: 'IP Address and User Agent successfully retrieved',
+      data: {
+        ipAddress: ip,
+        userAgent: userAgent,
+      },
     };
   }
 }

@@ -5,10 +5,11 @@ import * as cookieParser from 'cookie-parser';
 import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 import { ConfigService } from '@nestjs/config';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { NestExpressApplication } from '@nestjs/platform-express';
 
 async function bootstrap() {
   const configService = new ConfigService();
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
   // app.setGlobalPrefix('api');
   const logger = app.get(WINSTON_MODULE_NEST_PROVIDER);
 
@@ -26,6 +27,9 @@ async function bootstrap() {
       'Content-Type, Accept, Authorization, accesstoken, refreshtoken', // allow custom header
     credentials: true, // enable set cookie
   });
+
+  // enable trust proxy to get client ip address
+  app.set('trust proxy', 1);
 
   // enable shutdown hooks for SIGTERM so mikroOrm connection will closed if process is terminated
   app.enableShutdownHooks();
