@@ -1,5 +1,5 @@
 import 'dotenv/config';
-import { defineConfig, EntityMetadata, Platform } from '@mikro-orm/mysql';
+import { defineConfig } from '@mikro-orm/mysql';
 import { Logger } from '@nestjs/common';
 import { TsMorphMetadataProvider } from '@mikro-orm/reflection';
 import { Migrator, TSMigrationGenerator } from '@mikro-orm/migrations';

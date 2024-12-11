@@ -165,26 +165,11 @@ export class AuthService {
       throw new HttpException('Invalid token', 400);
     }
 
-    console.log(user.emailVerificationToken);
-    const date = Date.now();
-    console.log(date);
-    console.log(
-      new Date(date).toLocaleString('id-ID', { timeZone: 'Asia/Kuala_Lumpur' }),
-    );
-
     user.isVerified = true;
     user.verifiedTime = new Date();
     user.emailVerificationToken = '';
 
     await this.em.flush();
-
-    const exampleDate = 1733848146859;
-    console.log(
-      `Example date from unix to local time`,
-      new Date(exampleDate).toLocaleString('id-ID', {
-        timeZone: 'Asia/Kuala_Lumpur',
-      }),
-    );
 
     return {
       email: user.email,

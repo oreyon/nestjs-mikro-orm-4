@@ -10,7 +10,6 @@ async function bootstrap() {
   const configService = new ConfigService();
   const app = await NestFactory.create(AppModule);
   // app.setGlobalPrefix('api');
-  console.log(process.env.TEST);
   const logger = app.get(WINSTON_MODULE_NEST_PROVIDER);
 
   app.use(
@@ -45,4 +44,5 @@ async function bootstrap() {
 
   await app.listen(3000);
 }
+
 bootstrap();
