@@ -39,7 +39,7 @@ export class User {
   @Property({ default: false })
   isVerified: boolean = false;
 
-  @Property({ nullable: true, columnType: 'timestamp' })
+  @Property({ nullable: true, columnType: 'datetime' })
   verifiedTime?: Date;
 
   @Property({ length: 255, nullable: true })
@@ -48,16 +48,19 @@ export class User {
   @Property({ length: 255, nullable: true })
   passwordResetToken?: string;
 
-  @Property({ nullable: true, columnType: 'timestamp' })
+  @Property({ nullable: true, columnType: 'datetime' })
   passwordResetTokenExpirationTime?: Date;
 
-  @Property({ onCreate: () => new Date(), columnType: 'timestamp' })
+  @Property({
+    onCreate: () => new Date(),
+    columnType: 'datetime',
+  })
   createdAt: Date;
 
   @Property({
     onCreate: () => new Date(),
     onUpdate: () => new Date(),
-    columnType: 'timestamp',
+    columnType: 'datetime',
   })
   updatedAt: Date;
 

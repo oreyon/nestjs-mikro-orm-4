@@ -1,10 +1,11 @@
 import 'dotenv/config';
-import { defineConfig } from '@mikro-orm/mysql';
+import { defineConfig, EntityMetadata, Platform } from '@mikro-orm/mysql';
 import { Logger } from '@nestjs/common';
 import { TsMorphMetadataProvider } from '@mikro-orm/reflection';
-import { Migrator } from '@mikro-orm/migrations';
+import { Migrator, TSMigrationGenerator } from '@mikro-orm/migrations';
 import { EntityGenerator } from '@mikro-orm/entity-generator';
 import { SqlHighlighter } from '@mikro-orm/sql-highlighter';
+import { SeedManager } from '@mikro-orm/seeder';
 
 export default defineConfig({
   host: process.env.DB_HOST,
@@ -15,10 +16,14 @@ export default defineConfig({
   pool: { min: 2, max: 10 },
   entities: ['dist/**/*.entity.js'],
   entitiesTs: ['src/**/*.entity.ts'],
+  migrations: {
+    snapshot: true,
+    generator: TSMigrationGenerator,
+  },
   debug: true,
   ensureDatabase: true,
   logger: Logger.log.bind(new Logger('MikroORM')),
   highlighter: new SqlHighlighter(),
   metadataProvider: TsMorphMetadataProvider,
-  extensions: [Migrator, EntityGenerator, EntityGenerator],
+  extensions: [Migrator, EntityGenerator, SeedManager],
 });

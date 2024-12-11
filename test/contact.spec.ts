@@ -7,11 +7,13 @@ import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import * as cookieParser from 'cookie-parser';
 import { TestService } from './test.service';
 import { TestModule } from './test.module';
+import { ConfigService } from '@nestjs/config';
 
 describe('ContactController', () => {
   let app: INestApplication;
   let logger: Logger;
   let testService: TestService;
+  const configService = new ConfigService();
 
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -23,13 +25,18 @@ describe('ContactController', () => {
     logger = app.get(WINSTON_MODULE_PROVIDER);
     testService = app.get(TestService);
 
-    app.use(cookieParser());
+    app.use(
+      cookieParser([
+        `${configService.get('JWT_ACCESS_TOKEN_SECRET')}`,
+        `${configService.get('JWT_REFRESH_TOKEN_SECRET')}`,
+      ]),
+    );
     app.enableShutdownHooks();
     await app.init();
   });
 
   afterEach(async () => {
-    app.close();
+    await app.close();
   });
 
   describe('POST /api/v1/contacts', () => {
@@ -53,7 +60,7 @@ describe('ContactController', () => {
         .send({
           firstName: '',
         })
-        .set('Cookie', [`accesstoken=${tokens.accessToken}`]);
+        .set('Cookie', [`${tokens.signedAccessToken}`]);
 
       logger.info(response.body);
       expect(response.status).toBe(400);
@@ -71,7 +78,7 @@ describe('ContactController', () => {
           email: 'example@example.com',
           phone: '082134567890',
         })
-        .set('Cookie', [`accesstoken=${tokens.accessToken}`]);
+        .set('Cookie', [`${tokens.signedAccessToken}`]);
 
       logger.info(response.body);
       expect(response.status).toBe(201);
@@ -113,7 +120,7 @@ describe('ContactController', () => {
       const contact = await testService.getContactId();
       const response = await request(app.getHttpServer())
         .get(`/api/v1/contacts/${contact.id + 1}`)
-        .set(`Cookie`, [`accesstoken=${token.accessToken}`]);
+        .set(`Cookie`, [`${token.signedAccessToken}`]);
 
       logger.info(response.body);
       expect(response.status).toBe(404);
@@ -127,7 +134,7 @@ describe('ContactController', () => {
       console.log(`Contact Id: ${contact.id}`);
       const response = await request(app.getHttpServer())
         .get(`/api/v1/contacts/${contact.id}`)
-        .set('Cookie', [`accesstoken=${tokens.accessToken}`]);
+        .set('Cookie', [`${tokens.signedAccessToken}`]);
 
       logger.info(response.body);
       expect(response.status).toBe(200);
@@ -159,7 +166,7 @@ describe('ContactController', () => {
 
       const response = await request(app.getHttpServer())
         .delete(`/api/v1/contacts/${contact.id}+1`)
-        .set('Cookie', [`accesstoken=${token.accessToken}`]);
+        .set('Cookie', [`${token.signedAccessToken}`]);
 
       logger.info(response.body);
       expect(response.status).toBe(400);
@@ -172,7 +179,7 @@ describe('ContactController', () => {
 
       const response = await request(app.getHttpServer())
         .delete(`/api/v1/contacts/${contact.id}`)
-        .set('Cookie', [`accesstoken=${token.accessToken}`]);
+        .set('Cookie', [`${token.signedAccessToken}`]);
 
       logger.info(response.body);
       expect(response.status).toBe(200);
@@ -206,7 +213,7 @@ describe('ContactController', () => {
           email: '',
           phone: '',
         })
-        .set('Cookie', [`accesstoken=${tokens.accessToken}`]);
+        .set('Cookie', [`${tokens.signedAccessToken}`]);
 
       logger.info(response.body);
       expect(response.status).toBe(400);
@@ -225,7 +232,7 @@ describe('ContactController', () => {
           email: 'updateExample@example.com',
           phone: '082109876543',
         })
-        .set('Cookie', [`accesstoken=${tokens.accessToken}`]);
+        .set('Cookie', [`${tokens.signedAccessToken}`]);
 
       logger.info(response.body);
       expect(response.status).toBe(404);
@@ -244,7 +251,7 @@ describe('ContactController', () => {
           email: 'updateExample@example.com',
           phone: '082109876543',
         })
-        .set('Cookie', [`accesstoken=${tokens.accessToken}`]);
+        .set('Cookie', [`${tokens.signedAccessToken}`]);
 
       logger.info(response.body);
       expect(response.status).toBe(200);
@@ -275,7 +282,7 @@ describe('ContactController', () => {
 
       const response = await request(app.getHttpServer())
         .get('/api/v1/contacts')
-        .set('Cookie', [`accesstoken=${tokens.accessToken}`]);
+        .set('Cookie', [`${tokens.signedAccessToken}`]);
 
       logger.info(response.body);
       expect(response.status).toBe(200);
@@ -295,7 +302,7 @@ describe('ContactController', () => {
           page: 1,
           size: 10,
         })
-        .set('Cookie', [`accesstoken=${tokens.accessToken}`]);
+        .set('Cookie', [`${tokens.signedAccessToken}`]);
 
       logger.info(response.body);
       expect(response.status).toBe(200);
@@ -314,7 +321,7 @@ describe('ContactController', () => {
           page: 1,
           size: 10,
         })
-        .set('Cookie', [`accesstoken=${tokens.accessToken}`]);
+        .set('Cookie', [`${tokens.signedAccessToken}`]);
 
       logger.info(response.body);
       expect(response.status).toBe(200);
@@ -334,7 +341,7 @@ describe('ContactController', () => {
           page: 1,
           size: 10,
         })
-        .set('Cookie', [`accesstoken=${tokens.accessToken}`]);
+        .set('Cookie', [`${tokens.signedAccessToken}`]);
 
       logger.info(response.body);
       expect(response.status).toBe(200);
@@ -356,7 +363,7 @@ describe('ContactController', () => {
           page: 1,
           size: 10,
         })
-        .set('Cookie', [`accesstoken=${tokens.accessToken}`]);
+        .set('Cookie', [`${tokens.signedAccessToken}`]);
 
       logger.info(response.body);
       expect(response.status).toBe(200);
@@ -376,7 +383,7 @@ describe('ContactController', () => {
           page: 1,
           size: 10,
         })
-        .set('Cookie', [`accesstoken=${tokens.accessToken}`]);
+        .set('Cookie', [`${tokens.signedAccessToken}`]);
 
       logger.info(response.body);
       expect(response.status).toBe(200);
@@ -393,7 +400,7 @@ describe('ContactController', () => {
           page: 1,
           size: 10,
         })
-        .set('Cookie', [`accesstoken=${tokens.accessToken}`]);
+        .set('Cookie', [`${tokens.signedAccessToken}`]);
 
       logger.info(response.body);
       expect(response.status).toBe(200);
@@ -410,7 +417,7 @@ describe('ContactController', () => {
           page: 1,
           size: 10,
         })
-        .set('Cookie', [`accesstoken=${tokens.accessToken}`]);
+        .set('Cookie', [`${tokens.signedAccessToken}`]);
 
       logger.info(response.body);
       expect(response.status).toBe(200);
@@ -426,7 +433,7 @@ describe('ContactController', () => {
           page: 2,
           size: 1,
         })
-        .set('Cookie', [`accesstoken=${tokens.accessToken}`]);
+        .set('Cookie', [`${tokens.signedAccessToken}`]);
 
       logger.info(response.body);
       expect(response.status).toBe(200);

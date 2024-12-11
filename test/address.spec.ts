@@ -7,6 +7,7 @@ import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import * as cookieParser from 'cookie-parser';
 import { TestService } from './test.service';
 import { TestModule } from './test.module';
+import { ConfigService } from '@nestjs/config';
 
 const startTest = async (testService: TestService) => {
   await testService.deleteManyAddress();
@@ -30,6 +31,7 @@ describe('AddressController', () => {
   let app: INestApplication;
   let logger: Logger;
   let testService: TestService;
+  const configService = new ConfigService();
 
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -41,13 +43,18 @@ describe('AddressController', () => {
     logger = app.get(WINSTON_MODULE_PROVIDER);
     testService = app.get(TestService);
 
-    app.use(cookieParser());
+    app.use(
+      cookieParser([
+        `${configService.get('JWT_ACCESS_TOKEN_SECRET')}`,
+        `${configService.get('JWT_REFRESH_TOKEN_SECRET')}`,
+      ]),
+    );
     app.enableShutdownHooks();
     await app.init();
   });
 
   afterEach(async () => {
-    app.close();
+    await app.close();
   });
 
   describe('POST /api/v1/contacts/:contactId/addresses', () => {
@@ -79,7 +86,7 @@ describe('AddressController', () => {
           country: '',
           postalCode: '',
         })
-        .set('Cookie', [`accesstoken=${tokens.accessToken}`]);
+        .set('Cookie', [`${tokens.signedAccessToken}`]);
 
       logger.info(response.body);
       expect(response.status).toBe(400);
@@ -87,7 +94,7 @@ describe('AddressController', () => {
     });
 
     it('should be able to create address', async () => {
-      const token = await testService.login(app);
+      const tokens = await testService.login(app);
       const contact = await testService.getContactId();
 
       const response = await request(app.getHttpServer())
@@ -99,7 +106,7 @@ describe('AddressController', () => {
           country: 'example country',
           postalCode: '12345',
         })
-        .set('Cookie', [`accesstoken=${token.accessToken}`]);
+        .set('Cookie', [`${tokens.signedAccessToken}`]);
 
       logger.info(response.body);
       expect(response.status).toBe(201);
@@ -122,7 +129,7 @@ describe('AddressController', () => {
     });
 
     it('should be rejected if contact is not found', async () => {
-      const token = await testService.login(app);
+      const tokens = await testService.login(app);
       const contact = await testService.getContactId();
       const address = await testService.getAddressId();
 
@@ -131,7 +138,7 @@ describe('AddressController', () => {
 
       const response = await request(app.getHttpServer())
         .get(`/api/v1/contacts/${contact.id + 9999}/addresses/${address.id}`)
-        .set('Cookie', [`accesstoken=${token.accessToken}`]);
+        .set('Cookie', [`${tokens.signedAccessToken}`]);
 
       logger.info(response.body);
       expect(response.status).toBe(404);
@@ -141,11 +148,11 @@ describe('AddressController', () => {
     it('should be rejected if address is not found', async () => {
       const contact = await testService.getContactId();
       const address = await testService.getAddressId();
-      const token = await testService.login(app);
+      const tokens = await testService.login(app);
 
       const response = await request(app.getHttpServer())
         .get(`/api/v1/contacts/${contact.id}/addresses/${address.id + 9999}`)
-        .set('Cookie', [`accesstoken=${token.accessToken}`]);
+        .set('Cookie', [`${tokens.signedAccessToken}`]);
 
       logger.info(response.body);
       expect(response.status).toBe(404);
@@ -155,11 +162,11 @@ describe('AddressController', () => {
     it('should be able to get address', async () => {
       const contact = await testService.getContactId();
       const address = await testService.getAddressId();
-      const token = await testService.login(app);
+      const tokens = await testService.login(app);
 
       const response = await request(app.getHttpServer())
         .get(`/api/v1/contacts/${contact.id}/addresses/${address.id}`)
-        .set('Cookie', [`accesstoken=${token.accessToken}`]);
+        .set('Cookie', [`${tokens.signedAccessToken}`]);
 
       logger.info(response.body);
       expect(response.status).toBe(200);
@@ -184,7 +191,7 @@ describe('AddressController', () => {
     it('should be rejected if request is invalid', async () => {
       const contact = await testService.getContactId();
       const address = await testService.getAddressId();
-      const token = await testService.login(app);
+      const tokens = await testService.login(app);
 
       const response = await request(app.getHttpServer())
         .patch(`/api/v1/contacts/${contact.id}/addresses/${address.id}`)
@@ -195,7 +202,7 @@ describe('AddressController', () => {
           country: '',
           postalCode: '',
         })
-        .set('Cookie', [`accesstoken=${token.accessToken}`]);
+        .set('Cookie', [`${tokens.signedAccessToken}`]);
 
       logger.info(response.body);
       expect(response.status).toBe(400);
@@ -205,7 +212,7 @@ describe('AddressController', () => {
     it('should be rejected if contact was not found', async () => {
       const contact = await testService.getContactId();
       const address = await testService.getAddressId();
-      const token = await testService.login(app);
+      const tokens = await testService.login(app);
 
       const response = await request(app.getHttpServer())
         .patch(`/api/v1/contacts/${contact.id + 999}/addresses/${address.id}`)
@@ -216,7 +223,7 @@ describe('AddressController', () => {
           country: 'new example country',
           postalCode: '09876',
         })
-        .set('Cookie', [`accesstoken=${token.accessToken}`]);
+        .set('Cookie', [`${tokens.signedAccessToken}`]);
 
       logger.info(response.body);
       expect(response.status).toBe(404);
@@ -226,7 +233,7 @@ describe('AddressController', () => {
     it('should be rejected if address was not found', async () => {
       const contact = await testService.getContactId();
       const address = await testService.getAddressId();
-      const token = await testService.login(app);
+      const tokens = await testService.login(app);
 
       const response = await request(app.getHttpServer())
         .patch(`/api/v1/contacts/${contact.id}/addresses/${address.id + 9999}`)
@@ -237,7 +244,7 @@ describe('AddressController', () => {
           country: 'new example country',
           postalCode: '09876',
         })
-        .set('Cookie', [`accesstoken=${token.accessToken}`]);
+        .set('Cookie', [`${tokens.signedAccessToken}`]);
 
       logger.info(response.body);
       expect(response.status).toBe(404);
@@ -247,7 +254,7 @@ describe('AddressController', () => {
     it('should be able to update address', async () => {
       const contact = await testService.getContactId();
       const address = await testService.getAddressId();
-      const token = await testService.login(app);
+      const tokens = await testService.login(app);
 
       const response = await request(app.getHttpServer())
         .patch(`/api/v1/contacts/${contact.id}/addresses/${address.id}`)
@@ -258,7 +265,7 @@ describe('AddressController', () => {
           country: 'new example country',
           postalCode: '09876',
         })
-        .set('Cookie', [`accesstoken=${token.accessToken}`]);
+        .set('Cookie', [`${tokens.signedAccessToken}`]);
 
       logger.info(response.body);
       expect(response.status).toBe(200);
@@ -283,11 +290,11 @@ describe('AddressController', () => {
     it('should be rejected if contact does not exist', async () => {
       const contact = await testService.getContactId();
       const address = await testService.getAddressId();
-      const token = await testService.login(app);
+      const tokens = await testService.login(app);
 
       const response = await request(app.getHttpServer())
         .delete(`/api/v1/contacts/${contact.id + 999}/addresses/${address.id}`)
-        .set('Cookie', [`accesstoken=${token.accessToken}`]);
+        .set('Cookie', [`${tokens.signedAccessToken}`]);
 
       logger.info(response.body);
       expect(response.status).toBe(404);
@@ -297,11 +304,11 @@ describe('AddressController', () => {
     it('should be rejected if address does not exist', async () => {
       const contact = await testService.getContactId();
       const address = await testService.getAddressId();
-      const token = await testService.login(app);
+      const tokens = await testService.login(app);
 
       const response = await request(app.getHttpServer())
         .delete(`/api/v1/contacts/${contact.id}/addresses/${address.id + 9999}`)
-        .set('Cookie', [`accesstoken=${token.accessToken}`]);
+        .set('Cookie', [`${tokens.signedAccessToken}`]);
 
       logger.info(response.body);
       expect(response.status).toBe(404);
@@ -311,11 +318,11 @@ describe('AddressController', () => {
     it('should be able to delete address', async () => {
       const contact = await testService.getContactId();
       const address = await testService.getAddressId();
-      const token = await testService.login(app);
+      const tokens = await testService.login(app);
 
       const response = await request(app.getHttpServer())
         .delete(`/api/v1/contacts/${contact.id}/addresses/${address.id}`)
-        .set('Cookie', [`accesstoken=${token.accessToken}`]);
+        .set('Cookie', [`${tokens.signedAccessToken}`]);
 
       logger.info(response.body);
       expect(response.status).toBe(200);
@@ -334,11 +341,11 @@ describe('AddressController', () => {
 
     it('should be able to get all addresses', async () => {
       const contact = await testService.getContactId();
-      const token = await testService.login(app);
+      const tokens = await testService.login(app);
 
       const response = await request(app.getHttpServer())
         .get(`/api/v1/contacts/${contact.id}/addresses`)
-        .set('Cookie', [`accesstoken=${token.accessToken}`]);
+        .set('Cookie', [`${tokens.signedAccessToken}`]);
 
       logger.info(response.body);
       expect(response.status).toBe(200);

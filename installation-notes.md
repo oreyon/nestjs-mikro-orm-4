@@ -24,6 +24,9 @@ npm install --save @nestjs/swagger
   npx mikro-orm migration:create
 - migrate entity to database
   npx mikro-orm migration:up || npx mikro-orm migration:fresh
+- updating table after changing the entity
+  npx mikro-orm schema:update --run
+  npx mikro-orm migration:up
 
 logs
 
@@ -56,7 +59,7 @@ development server and saving it into SQL Migration files that are executed manu
   datetime(5-8 bytes): 2021-08-01 00:00:00
   unix time(8 bytes | big int): 1627776000
 
-timetamp and datetime is the more easy to query
+timestamp and datetime is easier to query
 unix time need more advanced to do query in database (from number to date and query)
 example: select * from table where date = from_unixtime(1627776000)
 
@@ -72,27 +75,20 @@ Usage: mikro-orm <command> [options]
 Commands:
   mikro-orm cache:clear             Clear metadata cache
   mikro-orm cache:generate          Generate metadata cache
-  mikro-orm generate-entities       Generate entities based on current database
-                                    schema
+  mikro-orm generate-entities       Generate entities based on current database schema
   mikro-orm database:create         Create your database if it does not exist
   mikro-orm database:import <file>  Imports the SQL file to the database
   mikro-orm seeder:run              Seed the database using the seeder class
   mikro-orm seeder:create <seeder>  Create a new seeder class
-  mikro-orm schema:create           Create database schema based on current
-                                    metadata
-  mikro-orm schema:drop             Drop database schema based on current
-                                    metadata
-  mikro-orm schema:update           Update database schema based on current
-                                    metadata
-  mikro-orm schema:fresh            Drop and recreate database schema based on
-                                    current metadata
-  mikro-orm migration:create        Create new migration with current schema
-                                    diff
+  mikro-orm schema:create           Create database schema based on currentmetadata
+  mikro-orm schema:drop             Drop database schema based on current metadata
+  mikro-orm schema:update           Update database schema based on current metadata
+  mikro-orm schema:fresh            Drop and recreate database schema based on current metadata
+  mikro-orm migration:create        Create new migration with current schema diff
   mikro-orm migration:up            Migrate up to the latest version
   mikro-orm migration:down          Migrate one step down
   mikro-orm migration:list          List all executed migrations
-  mikro-orm migration:check         Check if migrations are needed. Useful for
-                                    bash scripts.
+  mikro-orm migration:check         Check if migrations are needed. Useful for bash scripts.
   mikro-orm migration:pending       List all pending migrations
   mikro-orm migration:fresh         Clear the database and rerun all migrations
   mikro-orm debug                   Debug CLI configuration
