@@ -33,10 +33,14 @@ import { AccessTokenGuard, RefreshTokenGuard } from '../common/guards';
 import { UserData } from '../common/decorators';
 import { User } from './user.entity';
 import { ApiBearerAuth } from '@nestjs/swagger';
+import { NodemailerService } from '../nodemailer/nodemailer.service';
 
 @Controller('/api/v1/auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(
+    private authService: AuthService,
+    private readonly nodeMailerService: NodemailerService,
+  ) {}
 
   @HttpCode(HttpStatus.CREATED)
   @Post('/register')
@@ -169,5 +173,38 @@ export class AuthController {
         userAgent: userAgent,
       },
     };
+  }
+
+  @Post('/send-email')
+  async sendEmail(
+    @Body() request: { to: string; subject: string; html: string },
+  ) {
+    return this.nodeMailerService.sendEmail(request);
+  }
+
+  @Post('/send-verification-email')
+  async sendVerificationEmail(
+    @Body()
+    request: {
+      name: string;
+      email: string;
+      verificationToken: string;
+      origin: string;
+    },
+  ) {
+    return this.nodeMailerService.sendVerificationEmail(request);
+  }
+
+  @Post('/send-reset-password-email')
+  async sendResetPasswordEmail(
+    @Body()
+    request: {
+      name: string;
+      email: string;
+      token: string;
+      origin: string;
+    },
+  ) {
+    return this.nodeMailerService.sendResetPasswordEmail(request);
   }
 }

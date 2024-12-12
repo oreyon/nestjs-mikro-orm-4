@@ -14,6 +14,15 @@ npm install --save-dev pluralize @types/pluralize
 npm install --save @nestjs/swagger
 <!-- open api swagger documentation -->
 
+<!-- rate limiter -->
+npm i --save @nestjs/throttler
+<!-- rate limiter -->
+
+<!-- nodemailer -->
+npm i --save nodemailer
+npm i --save-dev @types/ nodemailer
+<!-- nodemailer -->
+
 ---
 
 - install mikro cli for convinient terminal.

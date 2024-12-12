@@ -8,6 +8,7 @@ import { TokensResponse } from '../model/tokens.model';
 import { v7 as uuidv7 } from 'uuid';
 import * as argon2 from 'argon2';
 import * as bcrypt from 'bcrypt';
+import * as crypto from 'crypto';
 
 import {
   CurrentUserResponse,
@@ -27,6 +28,7 @@ import { AuthValidation } from './auth.validation';
 import { Response } from 'express';
 import { EntityManager } from '@mikro-orm/mysql';
 import { Role, User } from './user.entity';
+import { NodemailerService } from '../nodemailer/nodemailer.service';
 
 @Injectable()
 export class AuthService {
@@ -36,6 +38,7 @@ export class AuthService {
     private em: EntityManager,
     private jwtService: JwtService,
     private configService: ConfigService,
+    private nodeMailerService: NodemailerService,
   ) {}
 
   async createTokens(userId: number): Promise<TokensResponse> {
@@ -120,7 +123,14 @@ export class AuthService {
 
     const isFirstAccount = (await this.em.count(User)) === 0;
     const role = isFirstAccount ? Role.ADMIN : Role.USER;
-    const emailVerificationToken = 'secret';
+
+    // if dev token is secret, if prod token is random
+    const emailVerificationToken =
+      this.configService.get('NODE_ENV') === 'development'
+        ? 'secret'
+        : crypto.randomBytes(40).toLocaleString('hex');
+
+    // hash the password
     registerRequest.password = await argon2.hash(registerRequest.password);
 
     const user = this.em.create(User, {
@@ -132,6 +142,18 @@ export class AuthService {
     });
 
     await this.em.persistAndFlush(user);
+
+    // front-end URL origin
+    const frontEndOrigin = this.configService.get('IP_FRONTEND_ORIGIN');
+
+    // send verification email
+    // make method sendVerificationEmail
+    await this.nodeMailerService.sendVerificationEmail({
+      email: user.email,
+      name: user.username,
+      verificationToken: user.emailVerificationToken,
+      origin: frontEndOrigin,
+    });
 
     return {
       email: user.email,
@@ -320,8 +342,21 @@ export class AuthService {
     if (!user) throw new HttpException('Invalid email address', 400);
     if (!user.isVerified) throw new HttpException('Email is not verified', 400);
 
-    const forgotToken = 'secret';
+    const forgotToken =
+      this.configService.get('NODE_ENV') === 'development'
+        ? 'secret'
+        : crypto.randomBytes(40).toString('hex');
     const hashForgotToken = await argon2.hash(forgotToken);
+
+    const frontEndOrigin = this.configService.get('IP_FRONTEND_ORIGIN');
+    //send reset password via email
+    await this.nodeMailerService.sendResetPasswordEmail({
+      email: user.email,
+      name: user.username,
+      token: forgotToken,
+      origin: frontEndOrigin,
+    });
+
     const expirationTime = new Date(Date.now() + 30 * 1000);
 
     user.passwordResetToken = hashForgotToken;

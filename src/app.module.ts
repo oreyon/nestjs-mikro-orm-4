@@ -7,6 +7,7 @@ import { ConfigModule } from '@nestjs/config';
 import { CommonModule } from './common/common.module';
 import { MikroService } from './mikro/mikro.service';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { NodemailerModule } from './nodemailer/nodemailer.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
     AuthModule,
     ContactModule,
     AddressModule,
+    NodemailerModule,
   ],
   controllers: [],
   providers: [
