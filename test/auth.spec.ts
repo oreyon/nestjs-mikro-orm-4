@@ -1,19 +1,20 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
-import * as request from 'supertest';
 import { AppModule } from '../src/app.module';
 import { Logger } from 'winston';
-import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
-import * as cookieParser from 'cookie-parser';
 import { TestService } from './test.service';
 import { TestModule } from './test.module';
 import { ConfigService } from '@nestjs/config';
+import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
+import * as request from 'supertest';
+import * as cookieParser from 'cookie-parser';
+
+const configService = new ConfigService();
 
 describe('AuthController', () => {
   let app: INestApplication;
   let logger: Logger;
   let testService: TestService;
-  const configService = new ConfigService();
 
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({

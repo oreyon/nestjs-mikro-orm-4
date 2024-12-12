@@ -5,6 +5,7 @@ import { EntityManager } from '@mikro-orm/mysql';
 import { Role, User } from '../src/auth/user.entity';
 import { Contact } from '../src/contact/contact.entity';
 import { Address } from '../src/address/address.entity';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class TestService {

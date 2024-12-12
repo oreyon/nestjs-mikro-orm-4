@@ -7,7 +7,7 @@ import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import * as cookieParser from 'cookie-parser';
 import { TestService } from './test.service';
 import { TestModule } from './test.module';
-import { ConfigService } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 
 const startTest = async (testService: TestService) => {
   await testService.deleteManyAddress();
@@ -35,7 +35,7 @@ describe('AddressController', () => {
 
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule, TestModule],
+      imports: [await ConfigModule.forRoot(), AppModule, TestModule],
     }).compile();
 
     app = moduleFixture.createNestApplication();
