@@ -97,5 +97,17 @@
     ],
     "coverageDirectory": "../coverage",
     "testEnvironment": "node"
+  },
+  "mikro-orm": {
+    "useTsNode": false,
+    "tsConfigPath": "./tsconfig.json",
+    "configPaths": [
+      "./src/mikro-orm.config.ts",
+      "./dist/mikro-orm.config.js"
+    ],
+    "entities": [
+      "./src/**/*.entity.ts",
+      "./dist/**/*.entity.js"
+    ]
   }
 }

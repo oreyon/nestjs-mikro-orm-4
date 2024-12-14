@@ -20,7 +20,7 @@ npm i --save @nestjs/throttler
 
 <!-- nodemailer -->
 npm i --save nodemailer
-npm i --save-dev @types/ nodemailer
+npm i --save-dev @types/nodemailer
 <!-- nodemailer -->
 
 ---
