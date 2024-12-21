@@ -1,40 +1,109 @@
-<!-- core -->
-npm i -s @mikro-orm/core @mikro-orm/nestjs @mikro-orm/mysql # for mysql/mariadb
+# Installation Notes
 
-<!-- extension -->
-npm install --save @mikro-orm/entity-generator @mikro-orm/migrations @mikro-orm/reflection @mikro-orm/seeder
-@mikro-orm/sql-highlighter
+<!-- core-package -->
+nest new nest-mikro-orm-repository
 
-<!-- for development -->
-<!-- cli is the most important after core dependency -->
-npm install --save-dev @mikro-orm/cli
-npm install --save-dev pluralize @types/pluralize
+npm i --save @nestjs/config
 
-<!-- open api swagger documentation -->
-npm install --save @nestjs/swagger
-<!-- open api swagger documentation -->
+npm i cookie-parser
+npm i -D @types/cookie-parser
 
-<!-- rate limiter -->
 npm i --save @nestjs/throttler
-<!-- rate limiter -->
 
-<!-- nodemailer -->
+npm install --save @nestjs/swagger
+
+npm install --save zod
+
+npm install nest-winston
+
+npm install --save bcrypt
+npm install --save-dev @types/bcrypt
+
+npm install --save uuid
+npm install --save-dev @types/uuid
+
+npm install --save argon2
+
+npm install --save @nestjs/passport passport
+
+npm install --save @nestjs/jwt passport-jwt
+npm install --save-dev @types/passport-jwt
+
 npm i --save nodemailer
 npm i --save-dev @types/nodemailer
-<!-- nodemailer -->
+<!-- core-package -->
+
+<!-- mikro-orm-core -->
+
+<!-- cli is the most important after core dependency -->
+// mikro-orm cli need to be installed in dependency to be able to use it in terminal docker
+
+npm install --save @mikro-orm/cli
+
+npm i -s @mikro-orm/core @mikro-orm/nestjs @mikro-orm/mysql
+
+npm install --save @mikro-orm/cli @mikro-orm/entity-generator @mikro-orm/migrations @mikro-orm/reflection
+@mikro-orm/seeder @mikro-orm/sql-highlighter
+
+npm install --save-dev pluralize @types/pluralize
+
+<!-- mikro-orm-core -->
+
+<!-- disable unit-test generation -->
+
+```
+{
+  "$schema": "<https://json.schemastore.org/nest-cli>",
+  "collection": "@nestjs/schematics",
+  "sourceRoot": "src",
+  "compilerOptions": {
+    "deleteOutDir": true
+  },
+  "generateOptions": {
+    "spec": false
+  }
+}
+```
+
+<!-- disable unit-test generation -->
+
+<!-- config mikro-orm package.json -->
+
+```
+  "mikro-orm": {
+    "useTsNode": false,
+    "tsConfigPath": "./tsconfig.json",
+    "configPaths": [
+      "./src/mikro-orm.config.ts",
+      "./dist/mikro-orm.config.js"
+    ],
+    "entities": [
+      "./src/**/*.entity.ts",
+      "./dist/**/*.entity.js"
+    ]
+  }
+```
+
+<!-- config mikro-orm package.json -->
 
 ---
 
 - install mikro cli for convinient terminal.
 - create mikro-orm module to import methods
 - create mikro-orm.config.ts as configuration settings of mikro orm
-- just use migration instead of schema beacuse the habbit more safer
+- just use migration instead of schema because the habit more safe
 - create migration file
   npx mikro-orm migration:create
 - migrate entity to database
   npx mikro-orm migration:up || npx mikro-orm migration:fresh
 - updating table after changing the entity
   npx mikro-orm schema:update --run
+  npx mikro-orm migration:up
+
+- run build/compiled project in docker or production:
+  npx mikro-orm debug
+  npx mikro-orm migration:check
+  npx mikro-orm migration:create
   npx mikro-orm migration:up
 
 logs

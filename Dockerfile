@@ -27,12 +27,10 @@ WORKDIR /app
 COPY --from=builder /app/package*.json /app/
 COPY --from=builder /app/tsconfig*.json /app/
 COPY --from=builder /app/dist /app/dist
-COPY --from=builder /app/node_modules /app/node_modules
 
-# Install mysql-client for entrypoint script
-RUN apk add --no-cache mysql-client
+RUN npm install --only=production
 
-# Use the custom entrypoint script
+# Use the custom entrypoint script ping the database before starting the application
 COPY entrypoint.sh /app/
 
 # Expose the API port

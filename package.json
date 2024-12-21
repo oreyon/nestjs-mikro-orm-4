@@ -21,6 +21,7 @@
     "mikro": "npx mikro-orm"
   },
   "dependencies": {
+    "@mikro-orm/cli": "^6.3.13",
     "@mikro-orm/core": "^6.3.13",
     "@mikro-orm/entity-generator": "^6.3.13",
     "@mikro-orm/migrations": "^6.3.13",
@@ -51,7 +52,6 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
-    "@mikro-orm/cli": "^6.3.13",
     "@nestjs/cli": "^10.0.0",
     "@nestjs/schematics": "^10.0.0",
     "@nestjs/testing": "^10.0.0",

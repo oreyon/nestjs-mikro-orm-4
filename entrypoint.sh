@@ -2,7 +2,8 @@
 
 echo "Waiting for MySQL to be available..."
 
-while ! mysqladmin ping -h"$DB_HOST" --silent; do
+# Using nc (Netcat) to check if the MySQL port (3306) is open
+while ! nc -z "$DB_HOST" 3306; do
   echo "Waiting for database connection..."
   sleep 2
 done
